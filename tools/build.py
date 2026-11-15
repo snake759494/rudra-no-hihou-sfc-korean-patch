@@ -24,31 +24,26 @@ def rd(fn):
     out = []
     for l in open(os.path.join(TR, fn), encoding='utf8').read().split('\n'):
         if '\t' in l:
-            k, v = l.split('\t', 1); out.append((k, v))
+            k, v = l.split('\t', 1); out.append((k, spellko.kor_text(v)))
     return out
 
 # ---------------- charset ----------------
-SPELLKANA = set(range(0x7A, 0xCC))
-if False:
-  for off, cnt, sz in [(0x32408, (0x32A08 - 0x32408) // 6, 6), (0x32A98, (0x32CD8 - 0x32A98) // 6, 6)]:
-    for i in range(cnt):
-        for b in R0[off + i * sz: off + i * sz + sz]:
-            if 0x7A <= b < 0xCC: SPELLKANA.add(b)
+import spellko
+BOARD = spellko.board(R0, T)  # hangul mantra syllables + 'ㄴ' + 'ー'
+SPELLCODES = {'ー': 0x7A}
+for n, ch in enumerate([b for b in BOARD if b != 'ー']): SPELLCODES[ch] = 0x7B + n
 LATIN1 = {'E': 0xEA, 'x': 0xE3, 'p': 0xDB, 'L': 0xF1, 'v': 0xE1, 'H': 0xED, 'P': 0xF5, 'M': 0xF2}
-FREE1 = [c for c in range(0x2A, 0x100) if c not in SPELLKANA and c not in LATIN1.values()]
+assert not set(SPELLCODES.values()) & set(LATIN1.values())
+FREE1 = [c for c in range(0x2A, 0x100) if c not in SPELLCODES.values() and c not in LATIN1.values()]
 POOL = open(os.path.join(TR, 'menu_base.txt'), encoding='utf8').read().strip()
 if os.path.exists(os.path.join(TR, 'menu_extra.txt')): POOL += open(os.path.join(TR, 'menu_extra.txt'), encoding='utf8').read().strip()
 EXTRA1 = [ch for ch in open(os.path.join(TR, 'pool_punct.txt'), encoding='utf8').read().strip()] if os.path.exists(os.path.join(TR, 'pool_punct.txt')) else []
-KT = dict(zip('アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポァィゥェォッャュョヴ',
-  '아이우에오카키크케코사시스세소타치츠테토나니누네노하히후헤호마미무메모야유요라리루레로와오ㄴ가기그게고자지즈제조다지즈데도바비브베보파피프페포아이우에오ㅅ야유요브'))
-KGLY = {c: KT[T[c]] for c in SPELLKANA if T[c] in KT}
-CMAP = {}
-for c in sorted(KGLY):
-    if KGLY[c] not in CMAP and T[c] not in 'ァィゥェォャュョヂヅ': CMAP[KGLY[c]] = c
-one = [ch for ch in list(POOL) + EXTRA1 if ch not in CMAP]
-assert len(one) <= len(FREE1), (len(one), len(FREE1))
+CMAP = dict(SPELLCODES)
+one = []
+for ch in list(POOL) + EXTRA1:
+    if ch not in CMAP and ch not in one: one.append(ch)
+assert len(one) <= len(FREE1), ('1-byte overflow', len(one), len(FREE1))
 for ch, c in zip(one, FREE1): CMAP[ch] = c
-for c in SPELLKANA: CMAP[T[c]] = c
 for ch, c in LATIN1.items(): CMAP[ch] = c
 CMAP[' '] = 0x18; CMAP['　'] = 0x18
 for ch, c in {'.': 0x19, ',': 0x1A, '?': 0x1B, '!': 0x1C, '「': 0x1D, '」': 0x1E, '‥': 0x1F}.items(): CMAP[ch] = c
@@ -121,14 +116,16 @@ def senc(g):
     return bytes(o)
 BIG = 0x1E7F80; SMALL = 0x1E73C0
 for ch, c in CMAP.items():
-    if ch in KEEP2 or ch in (' ', '　', '-', 'ー') or (c in SPELLKANA) or (c in LATIN1.values()) or ch.isdigit(): continue
-    if ch in KT: continue
+    if ch in KEEP2 or ch in (' ', '　', '-', 'ー') or (c in LATIN1.values()) or ch.isdigit(): continue
     R[BIG + c * 24: BIG + c * 24 + 24] = fenc(bigglyph(ch))
     if 0x20 <= c < 0x100:
         R[SMALL + (c - 0x20) * 16: SMALL + (c - 0x20) * 16 + 16] = senc(smallglyph(ch))
-for c, ch in KGLY.items():
-    R[BIG + c * 24: BIG + c * 24 + 24] = fenc(bigglyph(ch))
-    R[SMALL + (c - 0x20) * 16: SMALL + (c - 0x20) * 16 + 16] = senc(smallglyph(ch))
+# mantra 'ㄴ' cell: drawn low-left so it reads as a batchim of the previous syllable
+_g = bigglyph('은'); _n = np.zeros((12, 16), np.uint8); _n[9:12, 0:12] = _g[9:12, 4:16]
+R[BIG + CMAP['ㄴ'] * 24: BIG + CMAP['ㄴ'] * 24 + 24] = fenc(_n)
+_s = np.zeros((8, 16), np.uint8)
+for _y, _x0, _x1 in ((5, 0, 1), (6, 0, 1), (7, 0, 4)): _s[_y, _x0 * 2:_x1 * 2] = 1
+R[SMALL + (CMAP['ㄴ'] - 0x20) * 16: SMALL + (CMAP['ㄴ'] - 0x20) * 16 + 16] = senc(_s)
 # 1-byte slots left unused: blank them in small font
 for c in FREE1[len(one):]:
     R[SMALL + (c - 0x20) * 16: SMALL + (c - 0x20) * 16 + 16] = bytes(16)
@@ -224,16 +221,7 @@ for k, v in rd('labels_ko.txt'):
         w = (w0 & 0xFC00) | (0x200 + c * 2)
         R[off + j * 2] = w & 0xFF; R[off + j * 2 + 1] = w >> 8
 
-# name-entry grid: non-spell kana cells -> hangul syllables for default names
-NE = []
-k = 0
-for i in range(0x98C0, 0x9C00, 2):
-    w = R0[i] | R0[i + 1] << 8; t = w & 0x3FF; c = (t - 0x200) // 2
-    if t >= 0x2F4 and not t & 1 and 0x7A <= c < 0xCC and ((w >> 8) & 0xFC) in (0x20, 0x22, 0x30, 0x32, 0x24, 0x34, 0x28, 0x2C) and c not in SPELLKANA:
-        nc = CMAP[NE[k]] if k < len(NE) else 0x18
-        k += 1
-        w2 = (w & 0xFC00) | (0x200 + nc * 2); R[i] = w2 & 0xFF; R[i + 1] = w2 >> 8
-print('grid cells', k)
+print('spell', spellko.apply(R, R0, T, CMAP, [CMAP[ch] for ch in BOARD]))
 # prologue (graphic text)
 PL = open(os.path.join(TR, 'prologue_ko.txt'), encoding='utf8').read().strip().split(chr(10))
 orig_n = 0; p = 0x37F711
