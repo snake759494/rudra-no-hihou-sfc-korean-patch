@@ -1,0 +1,17 @@
+work/
+__pycache__/
+*.py[cod]
+*.bin
+*.sfc
+*.smc
+*.st
+*.srm
+*.state
+*.xdelta
+*.exe
+*.dll
+*.ttf
+*.otf
+*.zip
+shots/
+fontall.png
