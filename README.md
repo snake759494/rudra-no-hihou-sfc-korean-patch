@@ -1,6 +1,6 @@
 # 루드라의 비보 — 슈퍼 패미컴 한글패치
 
-일본판 **ルドラの秘宝(루드라의 비보)**(슈퍼 패미컴, 1996, 스퀘어)의 비공식 한글패치 **v2.0.1 (2026-11-16)** 입니다. 외부 기계 번역 없이 직접 번역했습니다.
+일본판 **ルドラの秘宝(루드라의 비보)**(슈퍼 패미컴, 1996, 스퀘어)의 비공식 한글패치 **v2.0.2 (2026-11-16)** 입니다. 외부 기계 번역 없이 직접 번역했습니다.
 
 [정식 패치 다운로드](https://github.com/snake759494/rudra-no-hihou-sfc-korean-patch/releases/latest) · [빌드](docs/BUILD.md) · [기술 설명](docs/TECHNICAL.md) · [검증 범위](docs/VALIDATION.md) · [한글 언령 목록](docs/MANTRA.md) · [변경 이력](CHANGELOG.md) · [권리 안내](RIGHTS.md)
 
@@ -27,8 +27,8 @@ Get-FileHash -Algorithm SHA256 'Rudra no Hihou (Korean).sfc'
 | 구분 | 바이트 | SHA-256 |
 | --- | ---: | --- |
 | source | 4,194,304 | `34552e3a1ecad8a6e979432226a49bd810c2f3c7ea3280e5dbb91e4db868a728` |
-| output | 4,194,304 | `cab00cc409c8a45174f29e56adb269e03654b2bc04476694c35bff04998de758` |
-| patch | 195,892 | `aa66dd0e8c3dde79064380cbe525ce7977843509b57fb1534d851981aee953b3` |
+| output | 4,194,304 | `70a123b0c5aa601d6e230a1b72b9f0ff32b62fd5dd50fdad03201adaba07c6e1` |
+| patch | 196,585 | `c34ee1bc5168aac1635c049085422c07df6a8a93ea9ea33571c7b6642a2fd284` |
 
 xdelta는 압축 옵션 없이 **`-e -0`**으로 빠르게 생성했습니다. 릴리즈 첨부는 xdelta 하나이며 ROM·글꼴·외부 실행 파일·저장 파일은 포함하지 않습니다.
 
