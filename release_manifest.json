@@ -1,11 +1,11 @@
 {
-  "version": "v2.0.0",
+  "version": "v2.0.1",
   "date": "2026-11-16",
   "repository": "https://github.com/snake759494/rudra-no-hihou-sfc-korean-patch",
   "files": {
     "source": {"file": "Rudra no Hihou (Japan).sfc", "size": 4194304, "sha256": "34552e3a1ecad8a6e979432226a49bd810c2f3c7ea3280e5dbb91e4db868a728"},
-    "output": {"file": "Rudra no Hihou (Korean).sfc", "size": 4194304, "sha256": "fcc3bae29d287a8ed368e749a4c57eb64668f64b20a6fc595f94991f4d1f288b"},
-    "patch": {"file": "Rudra_no_Hihou_SFC_KR.xdelta", "size": 195901, "sha256": "ac3c81bd6fe010e84857606840d770a107e04d0894159adfcb9b7ac19ab42868"}
+    "output": {"file": "Rudra no Hihou (Korean).sfc", "size": 4194304, "sha256": "cab00cc409c8a45174f29e56adb269e03654b2bc04476694c35bff04998de758"},
+    "patch": {"file": "Rudra_no_Hihou_SFC_KR.xdelta", "size": 195892, "sha256": "aa66dd0e8c3dde79064380cbe525ce7977843509b57fb1534d851981aee953b3"}
   },
   "fonts": {
     "Galmuri7.ttf": "3882bd35066c26b0392cd4963ff9b3c151041dec34adc9d5633d137d1d9b9855",
